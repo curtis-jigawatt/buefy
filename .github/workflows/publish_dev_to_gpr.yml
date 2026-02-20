@@ -23,12 +23,13 @@ jobs:
           path: packages/buefy/package.json
 
       - name: Add scope to package name and append GITHUB_SHA to the version in buefy/package.json
-        # uses the exact commit to prevent harmful updates
-        uses: jaywcjlove/github-action-package@4c0fcaf1440887bf51b501d7ccadd0a15caa7c81
-        with:
-          path: packages/buefy/package.json
-          rename: "@buefy/buefy"
-          version: "${{ steps.package_info.outputs.version }}-${{ env.GITHUB_SHA }}"
+        run: |
+          node -e "
+          const p = require('./packages/buefy/package.json');
+          p.name = '@${{ github.repository_owner }}/buefy';
+          p.version = '${{ steps.package_info.outputs.version }}-${{ env.GITHUB_SHA }}';
+          require('fs').writeFileSync('packages/buefy/package.json', JSON.stringify(p, null, 2));
+          "
 
       - uses: actions/setup-node@v4
         with:
@@ -38,8 +39,8 @@ jobs:
       # npm ci won't work due to the package name change
       - run: npm install
 
-      - run: npm -w @buefy/buefy run build
+      - run: npm -w @${{ github.repository_owner }}/buefy run build
 
-      - run: npm -w @buefy/buefy publish --access public
+      - run: npm -w @${{ github.repository_owner }}/buefy publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
