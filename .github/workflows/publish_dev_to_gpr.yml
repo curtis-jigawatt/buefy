@@ -39,7 +39,7 @@ jobs:
       # npm ci won't work due to the package name change
       - run: npm install
 
-      - run: npm -w @${{ github.repository_owner }}/buefy run build
+      - run: npm -w @${{ github.repository_owner }}/buefy run build:install
 
       - run: npm -w @${{ github.repository_owner }}/buefy publish --access public
         env:
